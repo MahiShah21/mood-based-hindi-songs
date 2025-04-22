@@ -1,7 +1,5 @@
 # mood-based-hindi-songs
 
-# Emotion-Based Hindi Music Recommender
-
 This project detects facial emotions from a webcam feed and recommends a Hindi music genre, opening a relevant song link in your default web browser.
 
 ## Overview
