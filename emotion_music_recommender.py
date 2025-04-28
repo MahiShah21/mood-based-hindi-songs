@@ -1,58 +1,58 @@
+import streamlit as st
 import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
 import random
 import webbrowser
+from PIL import Image
+import time
 
-# Load the pre-trained face detection model (Haar cascade)
+# Load your models and data (This should be in your main app file)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-# Load your trained emotion recognition model
 emotion_model = load_model('emotion_recognition_model.h5')
 emotion_labels = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
-
 hindi_song_links = {
     "happy": [
-        "https://youtu.be/Cc_cNEjAh_Y?si=i0PKZ9aK9q9RydFh",  # Hindi Happy Song 1
-        "https://youtu.be/Xf1922kJPfU?si=2GZj52VKSd-Wc9ts",  # Hindi Happy Song 2
-        "https://youtu.be/ZHsKQ_R0ZqI?si=nHGGH1FrvYXuXxEG",  # Hindi Happy Song 3
-        "https://youtu.be/WuMWwPHTSoY?si=TjdYH6xuDZd1PWxI"   # Hindi Happy Song 4
+        "https://youtu.be/Cc_cNEjAh_Y?si=i0PKZ9aK9q9RydFh",  # Example Hindi Happy Song 1
+        "https://youtu.be/Xf1922kJPfU?si=2GZj52VKSd-Wc9ts",  # Example Hindi Happy Song 2
+        "hhttps://youtu.be/ZHsKQ_R0ZqI?si=nHGGH1FrvYXuXxEG",  # Example Hindi Happy Song 3
+        "https://youtu.be/WuMWwPHTSoY?si=TjdYH6xuDZd1PWxI"   # Example Hindi Happy Song 4
     ],
     "sad": [
-        "https://youtu.be/AGsn2ycFRqI?si=tnvf0CkaG6cG0au5",   # Hindi Sad Song 1
-        "https://youtu.be/lmhKXQBgEQU?si=dJ22_MKgPRAEGix6",   # Hindi Sad Song 2
-        "https://youtu.be/6MgsHSAcI9k?si=giYRVzGPShebbE1O",   # Hindi Sad Song 3
-        "https://youtu.be/lN1m7zLBbSU?si=nBWMDBaW6mTl0gkm"    # Hindi Sad Song 4
+        "https://youtu.be/lN1m7zLBbSU?si=yBq7JWKTgGoTiA17",    # Example Hindi Sad Song 1
+        "https://youtu.be/pon8irRa8II?si=A3uVtYkSA0DL8cHw",    # Example Hindi Sad Song 2
+        "https://youtu.be/sVRwZEkXepg?si=538LGQErCKOM4c7k",    # Example Hindi Sad Song 3
+        "https://youtu.be/jE3deqmhZy4?si=U8JetAZkg7yU4UaF"     # Example Hindi Sad Song 4
     ],
     "angry": [
-        "https://www.youtube.com/watch?v=ESCjZui9ybM",  # Hindi Angry Song 1
-        "https://www.youtube.com/watch?v=TD6kW4oCcZY",  # Hindi Angry Song 2
-        "https://www.youtube.com/watch?v=T5Aqa1KjIqQ",  # Hindi Angry Song 3
-        "https://www.youtube.com/watch?v=mWRsgZuwf7w3"   # Hindi Angry Song 4
+        "https://youtu.be/jFGKJBPFdUA?si=IocpaNTI3_yQLszf",  # Example Hindi Angry Song 1
+        "https://youtu.be/zLVZxHWL0ro?si=Mn9wVqvK2wsmOn7P",  # Example Hindi Angry Song 2
+        "https://youtu.be/O6VbrzF79zI?si=9XdpksO1VVkF46QJ",  # Example Hindi Angry Song 3
+        "https://youtu.be/p9DQINKZxWE?si=Xmi19_eD20Oa8XrF"   # Example Hindi Angry Song 4
     ],
     "surprise": [
-        "https://www.youtube.com/watch?v=mWRsgZuwf7w4", # Hindi Surprise Song 1
-        "https://www.youtube.com/watch?v=mWRsgZuwf7w5",  # Hindi Surprise Song 2
-        "https://www.youtube.com/watch?v=mWRsgZuwf7w6",  # Hindi Surprise Song 3
-        "https://www.youtube.com/watch?v=mWRsgZuwf7w7"   # Hindi Surprise Song 4
+        "https://youtu.be/HoCwa6gnmM0?si=BC2R7rC8YTPS-Rbl", # Example Hindi Surprise Song 1
+        "https://youtu.be/FLz2eQtI_1w?si=QHIc5wQ1ablKi-U3", # Example Hindi Surprise Song 2
+        "https://youtu.be/N5bELC8MXeU?si=yBSa4yPBmavxDBOV", # Example Hindi Surprise Song 3
+        "https://youtu.be/NTHz9ephYTw?si=oomYezxkLG6Ub-IL"  # Example Hindi Surprise Song 4
     ],
     "neutral": [
-        "https://www.youtube.com/watch?v=mWRsgZuwf7w8",  # Hindi Neutral Song 1
-        "https://www.youtube.com/watch?v=mWRsgZuwf7w9",  # Hindi Neutral Song 2
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ0",  # Hindi Neutral Song 3
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ1"   # Hindi Neutral Song 4
+        "https://youtu.be/Iy-6jmQCcrI?si=Vsmk353ih-W03k-u",  # Example Hindi Neutral Song 1
+        "https://youtu.be/AsguumsKgBI?si=F7D_QqBc7We-F3Yp",  # Example Hindi Neutral Song 2
+        "https://youtu.be/npao6yCXcGs?si=sjiGq8lPJNv3zEff",  # Example Hindi Neutral Song 3
+        "https://youtu.be/NTHz9ephYTw?si=oomYezxkLG6Ub-IL"   # Example Hindi Neutral Song 4
     ],
     "fear": [
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ2",  # Hindi Fear Song 1 (Soundtrack)
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ3",  # Hindi Fear Song 2 (Soundtrack)
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ4",  # Hindi Fear Song 3 (Soundtrack)
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ5"   # Hindi Fear Song 4 (Soundtrack)
+        "https://youtu.be/AsguumsKgBI?si=F7D_QqBc7We-F3Yp",     # Example Hindi Fear Song 1 (Instrumental)
+        "https://youtu.be/WRoLW48WOBg?si=WhyAmLlrWTbxmkZs",     # Example Hindi Fear Song 2 (Instrumental)
+        "https://youtu.be/lBvbNxiVmZA?si=eHI0QeGqkOy23Pn-",     # Example Hindi Fear Song 3 (Instrumental)
+        "https://youtu.be/Oj484P4OXD8?si=zgJYO3jvu25p8GQl"      # Example Hindi Fear Song 4 (Instrumental)
     ],
     "disgust": [
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ6", # Hindi Experimental Song 1 (Subjective)
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ7",  # Hindi Experimental Song 2 (Subjective)
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ8",  # Hindi Experimental Song 3 (Subjective)
-        "https://www.youtube.com/watch?v=f4Gu-4W_peQ9"   # Hindi Experimental Song 4 (Subjective)
+        "https://youtu.be/TfWmovvr0cw?si=XLhZl0PJ4ZR_5pNV",    # Example Hindi Disgust Song 1 (Figurative)
+        "https://youtu.be/7vnfdXAi5_Y?si=l0v_s2nMT2y-a9nM",    # Example Hindi Disgust Song 2 (Figurative)
+        "https://youtu.be/FZLadzn5i6Q?si=2x0RdgmfxZb_91TP",    # Example Hindi Disgust Song 3 (Figurative)
+        "https://youtu.be/WVMSjMtPbq0?si=NlVHrVHQ1QSRJmei"     # Example Hindi Disgust Song 4 (Figurative)
     ]
 }
 
@@ -60,65 +60,124 @@ def recommend_music(facial_expression):
     """Recommends a Hindi song link based on the detected facial expression."""
     expression = facial_expression.lower()
     if expression in hindi_song_links and hindi_song_links[expression]:
-        return random.choice(hindi_song_links[expression])  # Shuffles the songs
+        return random.choice(hindi_song_links[expression])
     else:
-        return "No specific Hindi song link for this emotion."
+        return None  # Return None if no link found
 
-# Open the default webcam
-cap = cv2.VideoCapture(0)
+# --- Playful Styling (Apply this to both pages)---
+st.set_page_config(
+    page_title="MoodTune Magic",
+    page_icon="🎶",
+)
 
-if not cap.isOpened():
-    print("Error: Could not open webcam.")
-    exit()
+st.markdown(
+    """
+    <style>
+    .big-font {
+        font-size:2.5rem !important;
+        color:#FF4B4B; /* A vibrant red */
+        font-weight: bold;
+    }
+    .emotion-text {
+        font-size: 1.8rem !important;
+        color: #1C83E1; /* A cheerful blue */
+    }
+    .recommendation-text {
+        font-size: 1.2rem !important;
+        color: #2E8B57; /* A friendly green */
+    }
+    .play-button {
+        background-color: #FFA07A !important; /* A warm salmon color */
+        color: white !important;
+        padding: 0.5em 1.5em !important;
+        border-radius: 10px !important;
+        font-weight: bold !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Error: Could not read frame.")
-        break
+# --- Home Page ---
+def home_page():
+    st.markdown("<p class='big-font'>MoodTune Magic ✨</p>", unsafe_allow_html=True)
+    st.subheader("Unleash your emotion, discover your sonic journey!")
+    if st.button("Detect My Emotion! 📸", type="primary"):
+        st.session_state.page = "detect"
+        st.rerun()
 
-    cv2.imshow('Press "s" to capture and get song link, "q" to quit', frame)
+# --- Detect Page ---
+def detect_page():
+    st.markdown("<p class='big-font'>Detecting Your Mood 🎵</p>", unsafe_allow_html=True)
 
-    if cv2.waitKey(1) & 0xFF == ord('s'):
-        # 's' key pressed, capture the current frame
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    col1, col2 = st.columns([3, 2])
+    video_placeholder = col1.empty()
+    emotion_placeholder = col2.empty()
+    recommendation_placeholder = col2.empty()
+    play_button_placeholder = col2.empty()
 
-        if faces is not None and len(faces) > 0:
-            (x, y, w, h) = faces[0]  # Consider only the first detected face
-            face_roi = gray[y:y + h, x:x + w]
-            resized_face = cv2.resize(face_roi, (48, 48))
-            normalized_face = resized_face / 255.0
-            reshaped_face = np.expand_dims(normalized_face, axis=0)
-            reshaped_face = np.expand_dims(reshaped_face, axis=-1)
+    if st.button("Start Emotion Detection 📸", key="start_detection"):
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            st.error("Failed to open webcam.")
+            return
 
-            # Predict emotion
-            predictions = emotion_model.predict(reshaped_face)
-            predicted_emotion_index = np.argmax(predictions[0])
-            predicted_emotion = emotion_labels[predicted_emotion_index]
+        with st.spinner("Detecting your emotion..."):
+            ret, frame = cap.read()
+            if ret:
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                print(f"Grayscale image dtype before detectMultiScale: {gray.dtype}") # <--- THIS LINE
 
-            # Get music recommendation (song link)
-            print("Predicted Emotion:", predicted_emotion)
-            recommended_song_link = recommend_music(predicted_emotion)
-            print("Recommended Song Link:", recommended_song_link)
+                faces = face_cascade.detectMultiScale(gray, 1.1, 4, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
+                detected_emotion = "No face detected"
+                recommended_link = None  # Initialize to None
+                detected_frame = frame.copy()  # To draw on
 
-            # Open the link in the default web browser
-            if recommended_song_link and recommended_song_link.startswith("http"):
-                webbrowser.open_new_tab(recommended_song_link)
-                cv2.putText(frame, "Link opened in browser", (x, y + h + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
+                if faces is not None and len(faces) > 0:
+                    for (x, y, w, h) in faces:
+                        face_roi = gray[y:y + h, x:x + w]
+                        resized_face = cv2.resize(face_roi, (48, 48))
+                        normalized_face = resized_face / 255.0
+                        reshaped_face = np.expand_dims(normalized_face, axis=0)
+                        reshaped_face = np.expand_dims(reshaped_face, axis=-1)
+                        predictions = emotion_model.predict(reshaped_face)
+                        predicted_emotion_index = np.argmax(predictions[0])
+                        predicted_emotion = emotion_labels[predicted_emotion_index]
+                        detected_emotion = f"<p class='emotion-text'>{predicted_emotion.capitalize()}!</p>"
+                        recommended_link = recommend_music(predicted_emotion)
+                        cv2.rectangle(detected_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        cv2.putText(detected_frame, predicted_emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                        break # Process only the first detected face
+
+                frame_rgb = cv2.cvtColor(detected_frame, cv2.COLOR_BGR2RGB)
+                img = Image.fromarray(frame_rgb)
+                video_placeholder.image(img, caption="Detected Face")
+                emotion_placeholder.markdown(f"**Your Mood:** {detected_emotion}", unsafe_allow_html=True)
+                if recommended_link:
+                    recommendation_placeholder.markdown(f"<p class='recommendation-text'>**Tune Suggestion:** {recommended_link}</p>", unsafe_allow_html=True)
+                    webbrowser.open_new_tab(recommended_link) # Directly open the link
+                    play_button_placeholder.empty() # Remove the play button
+                else:
+                    recommendation_placeholder.markdown("<p class='recommendation-text'>**Tune Suggestion:** No specific song found.</p>", unsafe_allow_html=True)
+                    play_button_placeholder.empty()
+
             else:
-                cv2.putText(frame, "No valid link", (x, y + h + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                with col1:
+                    st.write("Click 'Start Emotion Detection' to begin!")
+                with col2:
+                    st.empty()  # Clear any previous results
 
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(frame, f"Emotion: {predicted_emotion}", (x, y - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            cv2.imshow('Detected Emotion', frame) # Show the frame with detection
-        else:
-            print("No face detected.")
+        cap.release() # Release the webcam after detection
 
-        break  # Exit the loop after one detection
+    if st.button("Back to Home", key="back_button"):
+        st.session_state.page = "home"
+        st.rerun()
 
-    elif cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+# --- Main App Logic ---
+if "page" not in st.session_state:
+    st.session_state.page = "home"
 
-cap.release()
-cv2.destroyAllWindows()
+if st.session_state.page == "home":
+    home_page()
+elif st.session_state.page == "detect":
+    detect_page()

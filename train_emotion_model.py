@@ -10,7 +10,7 @@ batch_size = 64
 epochs = 30
 
 # Define the directory where the "train" and "test" folders are located
-data_dir = 'C:/Users/dell/Desktop/moodtunes_api.py/archive'  # Replace with the actual path to the "archive" folder
+data_dir = 'C:\Users\dell\Desktop\MusicApp\mood-based-hindi-songs\archive'  # Replace with the actual path to the "archive" folder
 
 # Create ImageDataGenerator for training data with augmentation
 train_datagen = ImageDataGenerator(
